@@ -10,6 +10,8 @@ import math
 
 #N= number of documents
 N=20000
+fileOUT1='matrix.txt'
+
 
 if len(sys.argv) != 2:
     print 'Usage: p2.py [path]filename'
@@ -35,11 +37,17 @@ def calculateSquareSum(docFreqDist) :
 
 def calculateWight(word,docFreqDist,squarSum) :
     wight=0.0
-    ni=collectionFreqDist.freq(word)
+    ni=collectionFreqDist[word]
     logNByni=math.log(N/ni)
     fij= docFreqDist[word]
     wight=(fij/squarSum)* logNByni
     return wight
+
+def initializeRec():
+   initializedRec ={}
+   for key in collectionFreqDist.keys():
+      initializedRec[key]=0.0
+   return initializedRec
 
 
 fileIN = sys.argv[1]
@@ -48,7 +56,7 @@ lineNumber=0
 
 docNumber=0
 
-
+matrix=[]
 for doc in f.readlines():
    docNumber+=1
    docFreqDist = nltk.FreqDist()
@@ -58,9 +66,19 @@ for doc in f.readlines():
    for word in wordList:
       docFreqDist.inc(word)
    
-
    squarSum=calculateSquareSum(docFreqDist)
+   matrixRow=initializeRec()
+   
+
    for word in wordList:
       wordWightInDocument=calculateWight(word,docFreqDist,squarSum)
-
+      matrixRow[word]= wordWightInDocument
+   
+   matrix.append(matrixRow)
+   if docNumber % 1000 == 0:
+      print "processed 1000 docs"
 f.close()
+
+fout1=open(fileOUT1,'w')
+pickle.dump(matrix, fout1) 
+fout1.close()
