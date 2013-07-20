@@ -9,7 +9,7 @@ import math
 
 
 #N= number of documents
-N=20000
+N=100
 fileOUT1='matrix.txt'
 
 
@@ -39,7 +39,7 @@ def calculateWight(word,docFreqDist,squarSum) :
     wight=0.0
     ni=collectionFreqDist[word]
     logNByni=math.log(N/ni)
-    fij= docFreqDist[word]
+    fij= docFreqDist.freq(word)
     wight=(fij/squarSum)* logNByni
     return wight
 
@@ -58,6 +58,8 @@ lineNumber=0
 docNumber=0
 
 matrix=[]
+ten3=0
+
 for doc in f.readlines():
    docNumber+=1
    docFreqDist = nltk.FreqDist()
@@ -78,9 +80,12 @@ for doc in f.readlines():
    
    matrix.append(matrixRow)
    if docNumber % 1000 == 0:
-      print "processed 1000 docs"
+      ten3+=1
+      print "processed %d (thousands) docs"%(ten3)
 f.close()
 
+print "dumping matrix"
 fout1=open(fileOUT1,'w')
 pickle.dump(matrix, fout1) 
 fout1.close()
+print "done!"

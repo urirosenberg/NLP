@@ -9,15 +9,15 @@ from nltk.stem.lancaster import LancasterStemmer
 
 
 """
-    This is pre processing the doc
+    This is to be run on the test data
 """
 
-doctlist = []
-fileOUT1='output.txt'
-fileOUT2='tabulate.txt'
+testdDoctlist = []
+#fileOUT1='output.txt'
+#fileOUT2='tabulate.txt'
 pattern=re.compile("[^\w']|_")
 stopwords = stopwords.words('english')
-bagOfWords= set()
+#bagOfWords= set()
 
 def getText(nodelist):
     rc = []
@@ -33,9 +33,23 @@ def handleTok(tokenlist):
     return texts
 
 
+#get the matrix
+matrixFile=open('matrix.txt','r')
+matrix =pickle.load(matrixFile)
+matrixFile.close()
+
+
+def calculateSim(doc,fdist1):
+    sum=0.0
+    for keyWord in fdist1:
+       if keyWord in doc:
+          sum=sum+(fdist1.freq()
+       
+
+
 
 if len(sys.argv) != 2:
-    print 'Usage: p1.py [path]filename'
+    print 'Usage: classify.py [path]filename'
     sys.exit()
 
 st = LancasterStemmer()
@@ -53,10 +67,7 @@ for rawDoc in f.readlines():
    #get the subject
    subjectElement = dom.getElementsByTagName("subject")
    subject = handleTok(subjectElement)
-   
-   #get category
-   categoryElement=dom.getElementsByTagName("maincat")
-   category = handleTok(categoryElement)
+
 
    #get content
    contentElement=dom.getElementsByTagName("content")
@@ -73,15 +84,14 @@ for rawDoc in f.readlines():
          filtered_words.append(w)
          fdist1.inc(w)
 
-   doctlist.append({'text': str(filtered_words), 'category': str(category)})
-   if lineNumber % 1000 == 0:
-      print "processed 1000 lines"
+     
+   for doc in matrix:
+      sim=calculateSim(doc, fdist1)
+   
 
+'''
 fout1=open(fileOUT1,'w')
 for item in doctlist:
   fout1.write("%s\n" % item)
 fout1.close()
-
-fout2=open(fileOUT2,'w')
-pickle.dump(fdist1, fout2)
-fout2.close()
+'''
