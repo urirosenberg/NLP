@@ -43,10 +43,11 @@ def calculateWight(word,docFreqDist,squarSum) :
     wight=(fij/squarSum)* logNByni
     return wight
 
-def initializeRec():
+def initializeRec(documentCat):
    initializedRec ={}
    for key in collectionFreqDist.keys():
       initializedRec[key]=0.0
+   initializedRec['observed category']= documentCat
    return initializedRec
 
 
@@ -62,12 +63,13 @@ for doc in f.readlines():
    docFreqDist = nltk.FreqDist()
    rec=ast.literal_eval(doc)
    wordList=ast.literal_eval(rec['text'])
+   documentCat=rec['category']
 
    for word in wordList:
       docFreqDist.inc(word)
    
    squarSum=calculateSquareSum(docFreqDist)
-   matrixRow=initializeRec()
+   matrixRow=initializeRec(documentCat)
    
 
    for word in wordList:
