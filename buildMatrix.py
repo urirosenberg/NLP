@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+from __future__ import division
 import sys
 import re
 import nltk
 import ast
-from __future__ import division
+import pickle
+import math
+
 
 #N= number of documents
 N=20000
@@ -33,7 +36,7 @@ def calculateSquareSum(docFreqDist) :
 def calculateWight(word,docFreqDist,squarSum) :
     wight=0.0
     ni=collectionFreqDist.freq(word)
-    logNByni=log(N/ni)
+    logNByni=math.log(N/ni)
     fij= docFreqDist[word]
     wight=(fij/squarSum)* logNByni
     return wight
