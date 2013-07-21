@@ -20,7 +20,7 @@ fileOUT1='test_solution.out'
 pattern=re.compile("[^\w']|_")
 punctuation = re.compile(r'[-.?!,":;()|0-9]')
 stopwords = stopwords.words('english')
-K=10
+K=100
 lmtzr = WordNetLemmatizer()
 
 def getText(nodelist):
@@ -76,7 +76,7 @@ f=open(fileIN,'r')
 documentNumber=0
 fdist1 = nltk.FreqDist()
 
-similarityList=[]
+
 fout1=open(fileOUT1,'w')
 for rawDoc in f.readlines():
    documentNumber+=1
@@ -106,15 +106,20 @@ for rawDoc in f.readlines():
          fdist1.inc(w)
 
    #doc is a row in the matrix
-   xNorm = normalizeX(fdist1) 
+   xNorm = normalizeX(fdist1)
+   similarityList=[]
+   matrow=0
+   ten3=0
    for doc in matrix:
+      matrow+=1
       docCategory=doc['observed category'].strip()
       sim=calculateSim(doc, fdist1, xNorm)
       similarityList.append({'similarity': sim, 'category': docCategory})
-
+      
    similarityList.sort(reverse=True)
    categoryDist = nltk.FreqDist()
    for i in xrange(K):
+      print "top %d is %s"%(i,similarityList[i]['category'])
       categoryDist.inc(similarityList[i]['category'])
    theCategory=categoryDist.max()
    fout1.write("%s\n" % theCategory)
