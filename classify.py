@@ -4,6 +4,7 @@ import xml.dom.minidom
 import re
 import pickle
 import nltk
+import copy
 from nltk.corpus import stopwords
 from nltk.stem.lancaster import LancasterStemmer
 
@@ -13,11 +14,10 @@ from nltk.stem.lancaster import LancasterStemmer
 """
 
 testdDoctlist = []
-#fileOUT1='output.txt'
-#fileOUT2='tabulate.txt'
+fileOUT1='test_solution.out'
 pattern=re.compile("[^\w']|_")
 stopwords = stopwords.words('english')
-#bagOfWords= set()
+K=10
 
 def getText(nodelist):
     rc = []
@@ -39,14 +39,32 @@ matrix =pickle.load(matrixFile)
 matrixFile.close()
 
 
+def normalizeX(fdist):
+    sum1=0.0
+    for word in fdist:
+       sum1=sum1+(fdist.freq(word)**2)
+    sqr=(sum1**0.5)
+    return sqr
+
+def normalizeD(document):
+    sum2=0.0
+    for word in document:
+       sum2=sum2+(document[word]**2)
+    sqr2=(sum2**0.5)
+    return sqr2
+
 def calculateSim(doc,fdist1):
     sum=0.0
+    doc1 = copy.deepcopy(doc)
+    del doc1['observed category']
     for keyWord in fdist1:
-       if keyWord in doc:
-          sum=sum+(fdist1.freq()
-       
-
-
+       if keyWord in doc1:
+          sum=sum+(fdist1.freq(keyWord)*doc1[keyWord])
+    xNorm = normalizeX(fdist1)
+    dNorm = normalizeD(doc1)
+    sim=0.0
+    sim=(sum/(xNorm* dNorm))
+    return sim
 
 if len(sys.argv) != 2:
     print 'Usage: classify.py [path]filename'
@@ -55,12 +73,13 @@ if len(sys.argv) != 2:
 st = LancasterStemmer()
 fileIN = sys.argv[1]
 f=open(fileIN,'r')
-lineNumber=0
+documentNumber=0
 fdist1 = nltk.FreqDist()
 
-
+similarityList=[]
+fout1=open(fileOUT1,'w')
 for rawDoc in f.readlines():
-   lineNumber+=1
+   documentNumber+=1
    rawDoc = '<root>' + rawDoc + '</root>'
    dom = xml.dom.minidom.parseString(rawDoc)
    
@@ -84,14 +103,21 @@ for rawDoc in f.readlines():
          filtered_words.append(w)
          fdist1.inc(w)
 
-     
+   #doc is a row in the matrix  
    for doc in matrix:
+      docCategory=doc['observed category'].strip()
       sim=calculateSim(doc, fdist1)
-   
+      similarityList.append({'similarity': sim, 'category': docCategory})
 
-'''
-fout1=open(fileOUT1,'w')
-for item in doctlist:
-  fout1.write("%s\n" % item)
+   similarityList.sort(reverse=True)
+   categoryDist = nltk.FreqDist()
+   for i in xrange(K):
+      categoryDist.inc(similarityList[i]['category'])
+   theCategory=categoryDist.max()
+   fout1.write("%s\n" % theCategory)
+   
+   #if documentNumber % 1000 == 0:
+   #   ten3+=1
+   print "processed %d (thousands) docs"%(documentNumber)
+
 fout1.close()
-'''

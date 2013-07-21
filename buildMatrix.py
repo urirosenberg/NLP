@@ -9,7 +9,7 @@ import math
 
 
 #N= number of documents
-N=100
+N=20000
 fileOUT1='matrix.txt'
 
 
@@ -76,6 +76,8 @@ for doc in f.readlines():
 
    for word in wordList:
       wordWightInDocument=calculateWight(word,docFreqDist,squarSum)
+      if wordWightInDocument==' Entertainment':
+         print '************** net **************************'
       matrixRow[word]= wordWightInDocument
    
    matrix.append(matrixRow)
