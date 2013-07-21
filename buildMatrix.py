@@ -4,7 +4,7 @@ import sys
 import re
 import nltk
 import ast
-import pickle
+import cPickle as pickle
 import math
 
 
@@ -43,13 +43,15 @@ def calculateWight(word,docFreqDist,squarSum) :
     wight=(fij/squarSum)* logNByni
     return wight
 
-def initializeRec(documentCat):
-   initializedRec ={}
-   for key in collectionFreqDist.keys():
-      initializedRec[key]=0.0
-   initializedRec['observed category']= documentCat
-   return initializedRec
 
+def normalizeDoc(document):
+    sum2=0.0
+    sqr2=0.0
+    for word in document:
+       if word != 'observed category':
+          sum2+=(document[word]**2)
+    sqr2=(sum2**0.5)
+    return sqr2
 
 fileIN = sys.argv[1]
 f=open(fileIN,'r')
@@ -66,21 +68,23 @@ for doc in f.readlines():
    rec=ast.literal_eval(doc)
    wordList=ast.literal_eval(rec['text'])
    documentCat=rec['category']
+    
+   if len(wordList)!=0:
+      for word in wordList:
+         docFreqDist.inc(word)
+   
+      squarSum=calculateSquareSum(docFreqDist)
+      matrixRow={}
+      matrixRow['observed category']= documentCat
+   
 
-   for word in wordList:
-      docFreqDist.inc(word)
+      for word in wordList:
+         wordWightInDocument=calculateWight(word,docFreqDist,squarSum)
+         matrixRow[word]= wordWightInDocument
    
-   squarSum=calculateSquareSum(docFreqDist)
-   matrixRow=initializeRec(documentCat)
-   
-
-   for word in wordList:
-      wordWightInDocument=calculateWight(word,docFreqDist,squarSum)
-      if wordWightInDocument==' Entertainment':
-         print '************** net **************************'
-      matrixRow[word]= wordWightInDocument
-   
-   matrix.append(matrixRow)
+      norm= normalizeDoc(matrixRow)
+      matrixRow['normalized form']= norm
+      matrix.append(matrixRow)
    if docNumber % 1000 == 0:
       ten3+=1
       print "processed %d (thousands) docs"%(ten3)
@@ -88,6 +92,6 @@ f.close()
 
 print "dumping matrix"
 fout1=open(fileOUT1,'w')
-pickle.dump(matrix, fout1) 
+pickle.dump(matrix, fout1,protocol=2) 
 fout1.close()
 print "done!"

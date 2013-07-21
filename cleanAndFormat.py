@@ -6,7 +6,7 @@ import pickle
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem.lancaster import LancasterStemmer
-
+from nltk.stem.wordnet import WordNetLemmatizer
 
 """
     This is pre processing the doc
@@ -16,8 +16,10 @@ doctlist = []
 fileOUT1='output.txt'
 fileOUT2='tabulate.txt'
 pattern=re.compile("[^\w']|_")
+punctuation = re.compile(r'[-.?!,":;()|0-9]')
 stopwords = stopwords.words('english')
 bagOfWords= set()
+lmtzr = WordNetLemmatizer()
 
 def getText(nodelist):
     rc = []
@@ -64,12 +66,14 @@ for rawDoc in f.readlines():
    
    allText=subject+ ' ' + content
    allText=pattern.sub(' ', allText)
+   allText =punctuation.sub("", allText)
    allText=' '.join(allText.split())
    allText= allText.lower()
    filtered_words = []
    for w in str(allText).split():
       if w not in stopwords:
          w=st.stem(w)
+         w= lmtzr.lemmatize(w)
          filtered_words.append(w)
          fdist1.inc(w)
 

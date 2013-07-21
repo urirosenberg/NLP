@@ -7,6 +7,8 @@ import nltk
 import copy
 from nltk.corpus import stopwords
 from nltk.stem.lancaster import LancasterStemmer
+from nltk.stem.wordnet import WordNetLemmatizer
+
 
 
 """
@@ -16,8 +18,10 @@ from nltk.stem.lancaster import LancasterStemmer
 testdDoctlist = []
 fileOUT1='test_solution.out'
 pattern=re.compile("[^\w']|_")
+punctuation = re.compile(r'[-.?!,":;()|0-9]')
 stopwords = stopwords.words('english')
 K=10
+lmtzr = WordNetLemmatizer()
 
 def getText(nodelist):
     rc = []
@@ -46,24 +50,20 @@ def normalizeX(fdist):
     sqr=(sum1**0.5)
     return sqr
 
-def normalizeD(document):
-    sum2=0.0
-    for word in document:
-       sum2=sum2+(document[word]**2)
-    sqr2=(sum2**0.5)
-    return sqr2
-
-def calculateSim(doc,fdist1):
+def calculateSim(doc,fdist1, xNorm):
     sum=0.0
     doc1 = copy.deepcopy(doc)
     del doc1['observed category']
+    dNorm= doc1['normalized form']
+    del doc1['normalized form']
     for keyWord in fdist1:
        if keyWord in doc1:
           sum=sum+(fdist1.freq(keyWord)*doc1[keyWord])
-    xNorm = normalizeX(fdist1)
-    dNorm = normalizeD(doc1)
     sim=0.0
-    sim=(sum/(xNorm* dNorm))
+    if (xNorm* dNorm) != 0:
+       sim=(sum/(xNorm* dNorm))
+    else:
+       print "*****zero for doc %s"%doc1
     return sim
 
 if len(sys.argv) != 2:
@@ -95,18 +95,21 @@ for rawDoc in f.readlines():
    allText=subject+ ' ' + content
    allText=pattern.sub(' ', allText)
    allText=' '.join(allText.split())
+   allText =punctuation.sub("", allText)
    allText= allText.lower()
    filtered_words = []
    for w in str(allText).split():
       if w not in stopwords:
          w=st.stem(w)
+         w= lmtzr.lemmatize(w)
          filtered_words.append(w)
          fdist1.inc(w)
 
-   #doc is a row in the matrix  
+   #doc is a row in the matrix
+   xNorm = normalizeX(fdist1) 
    for doc in matrix:
       docCategory=doc['observed category'].strip()
-      sim=calculateSim(doc, fdist1)
+      sim=calculateSim(doc, fdist1, xNorm)
       similarityList.append({'similarity': sim, 'category': docCategory})
 
    similarityList.sort(reverse=True)
@@ -118,6 +121,6 @@ for rawDoc in f.readlines():
    
    #if documentNumber % 1000 == 0:
    #   ten3+=1
-   print "processed %d (thousands) docs"%(documentNumber)
+   print "processed %d docs"%(documentNumber)
 
 fout1.close()
