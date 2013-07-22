@@ -20,7 +20,7 @@ fileOUT1='test_solution.out'
 pattern=re.compile("[^\w']|_")
 punctuation = re.compile(r'[-.?!,":;()|0-9]')
 stopwords = stopwords.words('english')
-K=100
+K=10
 lmtzr = WordNetLemmatizer()
 
 def getText(nodelist):
@@ -116,11 +116,11 @@ for rawDoc in f.readlines():
       sim=calculateSim(doc, fdist1, xNorm)
       similarityList.append({'similarity': sim, 'category': docCategory})
       
-   similarityList.sort(reverse=True)
+   SortedsimilarityList=sorted(similarityList, key=lambda k: k['similarity'],reverse=True)
    categoryDist = nltk.FreqDist()
    for i in xrange(K):
-      print "top %d is %s"%(i,similarityList[i]['category'])
-      categoryDist.inc(similarityList[i]['category'])
+      print "top %d is %s"%(i, SortedsimilarityList[i]['category'])
+      categoryDist.inc(SortedsimilarityList[i]['category'])
    theCategory=categoryDist.max()
    fout1.write("%s\n" % theCategory)
    
