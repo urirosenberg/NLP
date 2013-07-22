@@ -16,7 +16,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 """
 
 testdDoctlist = []
-fileOUT1='test_solution.out'
+#fileOUT1='test_solution.out'
 pattern=re.compile("[^\w']|_")
 punctuation = re.compile(r'[-.?!,":;()|0-9]')
 stopwords = stopwords.words('english')
@@ -66,18 +66,19 @@ def calculateSim(doc,fdist1, xNorm):
        print "*****zero for doc %s"%doc1
     return sim
 
-if len(sys.argv) != 2:
-    print 'Usage: classify.py [path]filename'
+if len(sys.argv) != 3:
+    print 'Usage: classify.py [path]input-filename output-filename'
     sys.exit()
 
 st = LancasterStemmer()
 fileIN = sys.argv[1]
+fileOUT1 =sys.argv[2]
 f=open(fileIN,'r')
 documentNumber=0
 fdist1 = nltk.FreqDist()
 
 
-fout1=open(fileOUT1,'w')
+fout1=open(fileOUT1,'wb')
 for rawDoc in f.readlines():
    documentNumber+=1
    rawDoc = '<root>' + rawDoc + '</root>'
@@ -119,7 +120,7 @@ for rawDoc in f.readlines():
    SortedsimilarityList=sorted(similarityList, key=lambda k: k['similarity'],reverse=True)
    categoryDist = nltk.FreqDist()
    for i in xrange(K):
-      print "top %d is %s"%(i, SortedsimilarityList[i]['category'])
+   #   print "top %d is %s and similarity value is %f"%(i, SortedsimilarityList[i]['category'],SortedsimilarityList[i]['similarity'])
       categoryDist.inc(SortedsimilarityList[i]['category'])
    theCategory=categoryDist.max()
    fout1.write("%s\n" % theCategory)
