@@ -18,12 +18,13 @@ if len(sys.argv) != 2:
     sys.exit()
 
 tabulateFile=open('tabulate.txt','r')
-collectionFreqDist=nltk.FreqDist()
-collectionFreqDist =pickle.load(tabulateFile)
+#collectionFreqDist=nltk.FreqDist()
+#collectionFreqDist =pickle.load(tabulateFile)
+numOfDocsContainWord =pickle.load(tabulateFile)
 tabulateFile.close()
 
 #M=the number of distinct words in the collection
-M=len(collectionFreqDist)
+#M=len(collectionFreqDist)
 
 
 
@@ -37,7 +38,7 @@ def calculateSquareSum(docFreqDist) :
 
 def calculateWight(word,docFreqDist,squarSum) :
     wight=0.0
-    ni=collectionFreqDist[word]
+    ni=numOfDocsContainWord[word]
     logNByni=math.log(N/ni)
     fij= docFreqDist.freq(word)
     wight=(fij/squarSum)* logNByni

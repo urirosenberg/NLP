@@ -45,13 +45,14 @@ fileIN = sys.argv[1]
 f=open(fileIN,'r')
 lineNumber=0
 fdist1 = nltk.FreqDist()
-
+numOfDocsContainWord={}
 
 for rawDoc in f.readlines():
    lineNumber+=1
    rawDoc = '<root>' + rawDoc + '</root>'
    dom = xml.dom.minidom.parseString(rawDoc)
-   
+   docDist = nltk.FreqDist()
+    
    #get the subject
    subjectElement = dom.getElementsByTagName("subject")
    subject = handleTok(subjectElement)
@@ -74,8 +75,15 @@ for rawDoc in f.readlines():
       if w not in stopwords:
          w=st.stem(w)
          w= lmtzr.lemmatize(w)
-         filtered_words.append(w)
-         fdist1.inc(w)
+         filtered_words.append(w)          
+          #fdist1.inc(w)
+         docDist.inc(w)
+
+   for wrd in docDist.keys():
+       if wrd not in numOfDocsContainWord:
+          numOfDocsContainWord[wrd]=1
+       else:
+          numOfDocsContainWord[wrd]+=1
 
    doctlist.append({'text': str(filtered_words), 'category': str(category)})
    if lineNumber % 1000 == 0:
@@ -87,5 +95,5 @@ for item in doctlist:
 fout1.close()
 
 fout2=open(fileOUT2,'w')
-pickle.dump(fdist1, fout2)
+pickle.dump(numOfDocsContainWord, fout2)
 fout2.close()

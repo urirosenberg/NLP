@@ -5,6 +5,7 @@ import re
 import pickle
 import nltk
 import copy
+import time
 from nltk.corpus import stopwords
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -20,7 +21,7 @@ testdDoctlist = []
 pattern=re.compile("[^\w']|_")
 punctuation = re.compile(r'[-.?!,":;()|0-9]')
 stopwords = stopwords.words('english')
-K=10
+K=20
 lmtzr = WordNetLemmatizer()
 
 def getText(nodelist):
@@ -75,11 +76,12 @@ fileIN = sys.argv[1]
 fileOUT1 =sys.argv[2]
 f=open(fileIN,'r')
 documentNumber=0
-fdist1 = nltk.FreqDist()
 
 
 fout1=open(fileOUT1,'wb')
 for rawDoc in f.readlines():
+   start = time.time()
+   fdist1 = nltk.FreqDist()
    documentNumber+=1
    rawDoc = '<root>' + rawDoc + '</root>'
    dom = xml.dom.minidom.parseString(rawDoc)
@@ -113,20 +115,32 @@ for rawDoc in f.readlines():
    ten3=0
    for doc in matrix:
       matrow+=1
-      docCategory=doc['observed category'].strip()
+      docCategory=doc['observed category']
       sim=calculateSim(doc, fdist1, xNorm)
       similarityList.append({'similarity': sim, 'category': docCategory})
-      
+   
+   SortedsimilarityList=[]   
    SortedsimilarityList=sorted(similarityList, key=lambda k: k['similarity'],reverse=True)
    categoryDist = nltk.FreqDist()
    for i in xrange(K):
-   #   print "top %d is %s and similarity value is %f"%(i, SortedsimilarityList[i]['category'],SortedsimilarityList[i]['similarity'])
-      categoryDist.inc(SortedsimilarityList[i]['category'])
-   theCategory=categoryDist.max()
-   fout1.write("%s\n" % theCategory)
+      checkCategory=SortedsimilarityList[i]['category']
+      categoryDist.inc(checkCategory)
    
+   argmaxList = []
+   for category in categoryDist:
+      probOfCatDependDoc = (categoryDist[category]/K)
+      argmaxList.append({'probability': probOfCatDependDoc, 'category': category})
+   
+
+   #theCategory=categoryDist.max()
+   theCategory=max(argmaxList, key=lambda k: k['probability'])['category'].strip()
+   fout1.write("%s\n" % theCategory)
+   fout1.flush()
+
    #if documentNumber % 1000 == 0:
    #   ten3+=1
-   print "processed %d docs"%(documentNumber)
+   end = time.time()
+   docProcessingTime= end - start
+   print "processed %d docs. Processing time: %d (seconds)"%(documentNumber,docProcessingTime)
 
 fout1.close()
